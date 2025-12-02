@@ -2,18 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
+import './StudentsPage.css';
 
 export default function StudentsPage() {
   const [rows, setRows] = useState([]);
 
-  // create fields
+  // create (new person + student)
   const [full_name, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [student_id, setStudentId] = useState('');
   const [cohort, setCohort] = useState('');
 
+  // create (from existing person)
+  const [fp_person_id, setFpPersonId] = useState('');
+  const [fp_student_id, setFpStudentId] = useState('');
+  const [fp_cohort, setFpCohort] = useState('');
+
   // edit
-  const [editingId, setEditingId] = useState(null); // student_id
+  const [editingId, setEditingId] = useState(null);
   const [eFullName, setEFullName] = useState('');
   const [eEmail, setEEmail] = useState('');
   const [eCohort, setECohort] = useState('');
@@ -28,7 +34,27 @@ export default function StudentsPage() {
     e.preventDefault();
     try {
       await api.post('/students', { full_name, email, student_id, cohort });
-      setFullName(''); setEmail(''); setStudentId(''); setCohort('');
+      setFullName('');
+      setEmail('');
+      setStudentId('');
+      setCohort('');
+      load();
+    } catch (err) {
+      alert(getErrorMessage(err));
+    }
+  }
+
+  async function createStudentFromPerson(e) {
+    e.preventDefault();
+    try {
+      await api.post('/students/from-person', {
+        person_id: fp_person_id,
+        student_id: fp_student_id,
+        cohort: fp_cohort || null,
+      });
+      setFpPersonId('');
+      setFpStudentId('');
+      setFpCohort('');
       load();
     } catch (err) {
       alert(getErrorMessage(err));
@@ -66,31 +92,45 @@ export default function StudentsPage() {
   }
 
   return (
-    <div>
+    <div className="students-page">
       <h2>Students</h2>
 
-      <form onSubmit={createStudent} style={{ border: '1px solid #eee', padding: 16, borderRadius: 12, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0 }}>Create Student</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      {/* Form 1 */}
+      <form className="form-box" onSubmit={createStudent}>
+        <h3>Create Student (new person)</h3>
+        <div className="form-grid">
           <FormField label="Full Name" value={full_name} onChange={setFullName} required />
           <FormField label="Email" value={email} onChange={setEmail} required />
           <FormField label="Student ID" value={student_id} onChange={setStudentId} maxLength={10} required />
           <FormField label="Cohort" value={cohort} onChange={setCohort} placeholder="e.g. U28" />
         </div>
-        <div style={{ marginTop: 10 }}>
+        <div className="form-submit">
           <button type="submit">Create</button>
         </div>
       </form>
 
-      <table width="100%" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
+      {/* Form 2 */}
+      <form className="form-box" onSubmit={createStudentFromPerson}>
+        <h3>Create Student from Person (existing)</h3>
+        <div className="form-grid">
+          <FormField label="Person ID" type="number" value={fp_person_id} onChange={setFpPersonId} required />
+          <FormField label="Student ID" value={fp_student_id} onChange={setFpStudentId} maxLength={10} required />
+          <FormField label="Cohort" value={fp_cohort} onChange={setFpCohort} placeholder="e.g. U28" />
+        </div>
+        <div className="form-submit">
+          <button type="submit">Create from Person</button>
+        </div>
+      </form>
+
+      <table className="students-table" width="100%" cellPadding="8">
         <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
+          <tr>
             <th>Student ID</th><th>Name</th><th>Email</th><th>Cohort</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(r => (
-            <tr key={r.student_id} style={{ borderBottom: '1px solid #f2f2f2' }}>
+            <tr key={r.student_id}>
               <td>{r.student_id}</td>
               <td>
                 {editingId === r.student_id
@@ -104,10 +144,10 @@ export default function StudentsPage() {
               </td>
               <td>
                 {editingId === r.student_id
-                  ? <input value={eCohort} onChange={e => setECohort(e.target.value)} style={{ width: 100 }} />
+                  ? <input className="cohort-input" value={eCohort} onChange={e => setECohort(e.target.value)} />
                   : (r.cohort || '—')}
               </td>
-              <td style={{ whiteSpace: 'nowrap' }}>
+              <td className="actions-cell">
                 {editingId === r.student_id ? (
                   <>
                     <button onClick={() => setEditingId(null)}>Cancel</button>{' '}
@@ -116,7 +156,10 @@ export default function StudentsPage() {
                 ) : (
                   <>
                     <button onClick={() => startEdit(r)}>Edit</button>{' '}
-                    <ConfirmButton confirm="Delete this student (and underlying person)?" onClick={() => remove(r.student_id)}>
+                    <ConfirmButton
+                      confirm="Delete this student (and underlying person)?"
+                      onClick={() => remove(r.student_id)}
+                    >
                       Delete
                     </ConfirmButton>
                   </>
@@ -125,7 +168,11 @@ export default function StudentsPage() {
             </tr>
           ))}
           {!rows.length && (
-            <tr><td colSpan="5" style={{ padding: 24, textAlign: 'center', opacity: 0.6 }}>No students</td></tr>
+            <tr>
+              <td colSpan="5" className="no-data">
+                No students
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

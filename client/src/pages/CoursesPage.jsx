@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
+import './CoursesPage.css';
 
 export default function CoursesPage() {
   const [items, setItems] = useState([]);
@@ -24,7 +25,7 @@ export default function CoursesPage() {
     setItems(data);
   }
 
-  useEffect(() => { load(); /* initial */ }, []);
+  useEffect(() => { load(); }, []);
   useEffect(() => {
     const t = setTimeout(load, 300);
     return () => clearTimeout(t);
@@ -72,41 +73,41 @@ export default function CoursesPage() {
   }
 
   return (
-    <div>
+    <div className="courses-page">
       <h2>Courses</h2>
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '12px 0 20px' }}>
+      <div className="search-row">
         <input
+          className="search-input"
           value={q}
           onChange={e => setQ(e.target.value)}
           placeholder="Search code/name…"
-          style={{ padding: '8px 10px', border: '1px solid #ddd', borderRadius: 8, flex: 1 }}
         />
         <button onClick={() => setQ('')}>Clear</button>
       </div>
 
-      <form onSubmit={createCourse} style={{ border: '1px solid #eee', padding: 16, borderRadius: 12, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0 }}>Create Course</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <form className="create-form" onSubmit={createCourse}>
+        <h3>Create Course</h3>
+        <div className="form-grid">
           <FormField label="Course Code" value={course_code} onChange={setCourseCode} maxLength={11} required />
           <FormField label="Course Name" value={course_name} onChange={setCourseName} required />
           <FormField label="Credit" type="number" value={credit} onChange={v => setCredit(v)} min={0} max={30} />
           <FormField label="Description" value={course_description} onChange={setCourseDesc} />
         </div>
-        <div style={{ marginTop: 10 }}>
+        <div className="form-submit">
           <button type="submit">Create</button>
         </div>
       </form>
 
-      <table width="100%" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
+      <table className="courses-table" width="100%" cellPadding="8">
         <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
+          <tr>
             <th>Code</th><th>Name</th><th>Credit</th><th>Description</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {items.map(it => (
-            <tr key={it.course_code} style={{ borderBottom: '1px solid #f2f2f2' }}>
+            <tr key={it.course_code}>
               <td>{it.course_code}</td>
               <td>
                 {editingCode === it.course_code ? (
@@ -115,7 +116,12 @@ export default function CoursesPage() {
               </td>
               <td>
                 {editingCode === it.course_code ? (
-                  <input type="number" value={editCredit} onChange={e => setEditCredit(e.target.value)} style={{ width: 80 }} />
+                  <input
+                    type="number"
+                    value={editCredit}
+                    onChange={e => setEditCredit(e.target.value)}
+                    className="credit-input"
+                  />
                 ) : it.credit}
               </td>
               <td>
@@ -123,7 +129,7 @@ export default function CoursesPage() {
                   <input value={editDesc} onChange={e => setEditDesc(e.target.value)} />
                 ) : (it.course_description || '—')}
               </td>
-              <td style={{ whiteSpace: 'nowrap' }}>
+              <td className="actions-cell">
                 {editingCode === it.course_code ? (
                   <>
                     <button onClick={() => setEditingCode(null)}>Cancel</button>{' '}
@@ -141,7 +147,9 @@ export default function CoursesPage() {
             </tr>
           ))}
           {!items.length && (
-            <tr><td colSpan="5" style={{ padding: 24, textAlign: 'center', opacity: 0.6 }}>No courses</td></tr>
+            <tr>
+              <td colSpan="5" className="no-data">No courses</td>
+            </tr>
           )}
         </tbody>
       </table>

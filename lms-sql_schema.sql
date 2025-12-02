@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS lms;
+
 CREATE DATABASE IF NOT EXISTS lms
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_0900_ai_ci;
@@ -16,7 +18,10 @@ CREATE TABLE IF NOT EXISTS person (
 	person_id BIGINT AUTO_INCREMENT, -- already PK
     full_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    PRIMARY KEY (person_id)
+    PRIMARY KEY (person_id),
+    
+    -- check for email validity. needs at least a character before @, after @, after ".".
+	CHECK (email LIKE '%_@_%._%')
 );
 
 CREATE TABLE IF NOT EXISTS student (
@@ -27,12 +32,20 @@ CREATE TABLE IF NOT EXISTS student (
     FOREIGN KEY (person_id) REFERENCES person (person_id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
+-- for quick sorting when needed.
+CREATE INDEX index_student_student_id ON student (student_id);
+
+
 CREATE TABLE IF NOT EXISTS instructor (
 	person_id BIGINT, -- already PK, also FK
     instructor_id CHAR(5) NOT NULL UNIQUE,
 	PRIMARY KEY (person_id),
     FOREIGN KEY (person_id) REFERENCES person (person_id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
+
+-- for quick sorting when needed.
+CREATE INDEX index_instructor_instructor_id ON instructor (instructor_id);
+
 
 CREATE TABLE IF NOT EXISTS term (
 	term_id SMALLINT AUTO_INCREMENT, -- already PK
@@ -86,6 +99,7 @@ CREATE TABLE IF NOT EXISTS class_session (
     CHECK (session_end_date > session_start_date)
 );
 
+
 -- who is in which class.
 CREATE TABLE IF NOT EXISTS enrolment (
 	enrolment_id BIGINT AUTO_INCREMENT, -- already PK
@@ -100,6 +114,10 @@ CREATE TABLE IF NOT EXISTS enrolment (
     -- a student cannot enrol more than one time for a class.
     CONSTRAINT unique_enrolment UNIQUE(student_id, class_offering_id)
 );
+
+-- for quick sorting when needed.
+CREATE INDEX index_enrolment_offering ON enrolment (class_offering_id);
+
 
 -- our lecturer told us to reduce the number of tables so we have this combined table now.
 -- pretend that every session must have an attendance and grading on the spot.
@@ -121,9 +139,19 @@ CREATE TABLE IF NOT EXISTS grades_and_attendance (
     CHECK (score >= 0 AND 100 >= score AND weight >= 0 AND 100 >= weight)
 );
 
--- Supporting indexes (InnoDB auto-creates for FKs, but named indexes aid readability/EXPLAIN)
-CREATE INDEX idx_enrolment_offering ON enrolment (class_offering_id);
-CREATE INDEX idx_enrolment_student  ON enrolment (student_id);
-CREATE INDEX idx_session_offering   ON class_session (class_offering_id);
-CREATE INDEX idx_ga_enrolment       ON grades_and_attendance (enrolment_id);
-CREATE INDEX idx_ga_session         ON grades_and_attendance (session_id);
+-- Views
+CREATE VIEW view_student_grades_and_attendance AS
+SELECT p.full_name, ga.session_id, ga.assessment_type, ga.score, ga.weight, ga.attendance_status
+FROM grades_and_attendance ga
+JOIN enrolment e ON ga.enrolment_id = e.enrolment_id
+JOIN student s ON s.student_id = e.student_id
+JOIN person p ON p.person_id = s.person_id;
+
+-- indexes to speed up the view
+CREATE INDEX index_ga_enrolment_id ON grades_and_attendance (enrolment_id);
+CREATE INDEX index_ga_session_id ON grades_and_attendance (session_id);
+CREATE INDEX index_enrolment_student_id ON enrolment (student_id);
+-- CREATE INDEX index_student_student_id ON student (student_id);
+CREATE INDEX index_student_person_id ON student (person_id);
+
+
