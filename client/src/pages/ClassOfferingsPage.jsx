@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
+import './StudentsPage.css'; // reuse existing styles
 
 export default function ClassOfferingsPage() {
   const [rows, setRows] = useState([]);
-  const [term_id, setTermId] = useState('');
-  const [course_code, setCourseCode] = useState('');
+
+  // single search query (?q=...) like backend
+  const [q, setQ] = useState('');
 
   // create
   const [cCourse, setCCourse] = useState('');
@@ -22,17 +24,19 @@ export default function ClassOfferingsPage() {
   const [eType, setEType] = useState('LEC');
 
   async function load() {
-    const params = {};
-    if (term_id) params.term_id = term_id;
-    if (course_code) params.course_code = course_code;
+    const params = q ? { q } : {};
     const { data } = await api.get('/class-offerings', { params });
     setRows(data);
   }
-  useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    load();
+  }, []);
+
   useEffect(() => {
     const t = setTimeout(load, 300);
     return () => clearTimeout(t);
-  }, [term_id, course_code]);
+  }, [q]);
 
   async function createOffering(e) {
     e.preventDefault();
@@ -41,9 +45,12 @@ export default function ClassOfferingsPage() {
         course_code: cCourse,
         term_id: Number(cTerm),
         class_group: cGroup,
-        class_type: cType
+        class_type: cType,
       });
-      setCCourse(''); setCTerm(''); setCGroup(''); setCType('LEC');
+      setCCourse('');
+      setCTerm('');
+      setCGroup('');
+      setCType('LEC');
       load();
     } catch (err) {
       alert(getErrorMessage(err));
@@ -64,7 +71,7 @@ export default function ClassOfferingsPage() {
         course_code: eCourse,
         term_id: Number(eTerm),
         class_group: eGroup,
-        class_type: eType
+        class_type: eType,
       });
       setEditing(null);
       load();
@@ -83,64 +90,155 @@ export default function ClassOfferingsPage() {
   }
 
   return (
-    <div>
+    <div className="students-page">
       <h2>Class Offerings</h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '12px 0 20px' }}>
-        <FormField label="Filter by Term ID" value={term_id} onChange={setTermId} placeholder="e.g. 1" />
-        <FormField label="Filter by Course Code" value={course_code} onChange={setCourseCode} placeholder="It's not working yet" />
+      {/* Search row like CoursesPage */}
+      <div className="search-row">
+        <input
+          className="search-input"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search course code / name…"
+        />
+        <button type="button" onClick={() => setQ('')}>Clear</button>
       </div>
 
-      <form onSubmit={createOffering} style={{ border: '1px solid #eee', padding: 16, borderRadius: 12, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0 }}>Create Offering</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <FormField label="Course Code" value={cCourse} onChange={setCCourse} required />
-          <FormField label="Term ID" value={cTerm} onChange={setCTerm} required />
-          <FormField label="Class Group" value={cGroup} onChange={setCGroup} required />
+      {/* Create form */}
+      <form onSubmit={createOffering} className="form-box">
+        <h3>Create Offering</h3>
+        <div className="form-grid">
+          <FormField
+            label="Course Code"
+            value={cCourse}
+            onChange={setCCourse}
+            required
+          />
+          <FormField
+            label="Term ID"
+            value={cTerm}
+            onChange={setCTerm}
+            required
+          />
+          <FormField
+            label="Class Group"
+            value={cGroup}
+            onChange={setCGroup}
+            required
+          />
           <label style={{ display: 'grid', gap: 4 }}>
             <span style={{ fontSize: 12, opacity: 0.8 }}>Class Type</span>
-            <select value={cType} onChange={e => setCType(e.target.value)} style={{ padding: '8px 10px', border: '1px solid #ddd', borderRadius: 8 }}>
+            <select
+              value={cType}
+              onChange={(e) => setCType(e.target.value)}
+              style={{ padding: '8px 10px', border: '1px solid #ddd', borderRadius: 8 }}
+            >
               <option>LEC</option>
               <option>LAB</option>
               <option>TUT</option>
             </select>
           </label>
         </div>
-        <div style={{ marginTop: 10 }}>
+        <div className="form-submit">
           <button type="submit">Create</button>
         </div>
       </form>
 
-      <table width="100%" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
+      {/* Table */}
+      <table className="students-table" width="100%" cellPadding="8">
         <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
-            <th>ID</th><th>Course</th><th>Term</th><th>Group</th><th>Type</th><th>Actions</th>
+          <tr>
+            <th>ID</th>
+            <th>Course (Code / Name)</th>
+            <th>Term</th>
+            <th>Group</th>
+            <th>Type</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map(r => (
-            <tr key={r.class_offering_id} style={{ borderBottom: '1px solid #f2f2f2' }}>
+          {rows.map((r) => (
+            <tr key={r.class_offering_id}>
               <td>{r.class_offering_id}</td>
-              <td>{editing === r.class_offering_id ? <input value={eCourse} onChange={e => setECourse(e.target.value)} /> : r.course_code}</td>
-              <td>{editing === r.class_offering_id ? <input value={eTerm} onChange={e => setETerm(e.target.value)} style={{ width: 90 }} /> : r.term_id}</td>
-              <td>{editing === r.class_offering_id ? <input value={eGroup} onChange={e => setEGroup(e.target.value)} style={{ width: 90 }} /> : r.class_group}</td>
               <td>
                 {editing === r.class_offering_id ? (
-                  <select value={eType} onChange={e => setEType(e.target.value)}>
-                    <option>LEC</option><option>LAB</option><option>TUT</option>
-                  </select>
-                ) : r.class_type}
+                  <input
+                    value={eCourse}
+                    onChange={(e) => setECourse(e.target.value)}
+                  />
+                ) : (
+                  <>
+                    <div>{r.course_code}</div>
+                    {r.course_name && (
+                      <div style={{ fontSize: 12, opacity: 0.8 }}>
+                        {r.course_name}
+                      </div>
+                    )}
+                  </>
+                )}
               </td>
-              <td style={{ whiteSpace: 'nowrap' }}>
+              <td>
+                {editing === r.class_offering_id ? (
+                  <input
+                    value={eTerm}
+                    onChange={(e) => setETerm(e.target.value)}
+                    style={{ width: 90 }}
+                  />
+                ) : (
+                  <>
+                    <div>{r.term_id}</div>
+                    {r.term_label && (
+                      <div style={{ fontSize: 12, opacity: 0.8 }}>
+                        {r.term_label}
+                      </div>
+                    )}
+                  </>
+                )}
+              </td>
+              <td>
+                {editing === r.class_offering_id ? (
+                  <input
+                    value={eGroup}
+                    onChange={(e) => setEGroup(e.target.value)}
+                    style={{ width: 90 }}
+                  />
+                ) : (
+                  r.class_group
+                )}
+              </td>
+              <td>
+                {editing === r.class_offering_id ? (
+                  <select
+                    value={eType}
+                    onChange={(e) => setEType(e.target.value)}
+                  >
+                    <option>LEC</option>
+                    <option>LAB</option>
+                    <option>TUT</option>
+                  </select>
+                ) : (
+                  r.class_type
+                )}
+              </td>
+              <td className="actions-cell">
                 {editing === r.class_offering_id ? (
                   <>
-                    <button onClick={() => setEditing(null)}>Cancel</button>{' '}
-                    <button onClick={saveEdit}>Save</button>
+                    <button type="button" onClick={() => setEditing(null)}>
+                      Cancel
+                    </button>{' '}
+                    <button type="button" onClick={saveEdit}>
+                      Save
+                    </button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => startEdit(r)}>Edit</button>{' '}
-                    <ConfirmButton confirm="Delete this class offering?" onClick={() => remove(r.class_offering_id)}>
+                    <button type="button" onClick={() => startEdit(r)}>
+                      Edit
+                    </button>{' '}
+                    <ConfirmButton
+                      confirm="Delete this class offering?"
+                      onClick={() => remove(r.class_offering_id)}
+                    >
                       Delete
                     </ConfirmButton>
                   </>
@@ -148,8 +246,13 @@ export default function ClassOfferingsPage() {
               </td>
             </tr>
           ))}
+
           {!rows.length && (
-            <tr><td colSpan="6" style={{ padding: 24, textAlign: 'center', opacity: 0.6 }}>No offerings</td></tr>
+            <tr>
+              <td colSpan="6" className="no-data">
+                No offerings
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

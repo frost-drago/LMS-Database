@@ -187,7 +187,7 @@ export default function InstructorsPage() {
                   <>
                     <button onClick={() => startEdit(r)}>Edit</button>{' '}
                     <ConfirmButton
-                      confirm="Delete this instructor (and underlying person)?"
+                      confirm="Delete this instructor?"
                       onClick={() => remove(r.instructor_id)}
                     >
                       Delete

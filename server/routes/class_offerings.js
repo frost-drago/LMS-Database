@@ -1,78 +1,124 @@
 const router = require('express').Router();
 const { pool } = require('../db');
 
-// CREATE
+// NOTE TO SELF. Inputs can come from:
+// - req.body → JSON from client (POST/PUT/PATCH)
+// - req.params → /:id segments in the URL
+// - req.query → ?q=search etc.
+
+// backticks are template literals
+
+// CREATE (from existing course)
+// [POST /class-offerings]
 router.post('/', async (req, res, next) => {
-  try {
-    const { course_code, term_id, class_group, class_type } = req.body;
-    const [r] = await pool.execute(
-      `INSERT INTO class_offering (course_code, term_id, class_group, class_type)
-       VALUES (?, ?, ?, ?)`,
-      [course_code, term_id, class_group, class_type]
-    );
-    const [rows] = await pool.execute(
-      `SELECT co.*, c.course_name, t.term_label
-       FROM class_offering co
-       JOIN course c ON c.course_code = co.course_code
-       JOIN term t   ON t.term_id = co.term_id
-       WHERE co.class_offering_id = ?`,
-      [r.insertId]
-    );
-    res.status(201).json(rows[0]);
-  } catch (e) { next(e); }
+    try {
+        // Get data from the request body
+        const { course_code, term_id, class_group, class_type } = req.body;
+        // Execute query
+        let query = `INSERT INTO class_offering (course_code, term_id, class_group, class_type)
+                     VALUES 
+                     (?, ?, ?, ?)`;
+        let parameters = [course_code, term_id, class_group, class_type];
+        const [r] = await pool.execute(query, parameters);
+        // Fetch the inserted row
+        // Just for best practices and to prevent DB from lying about the data.
+        let query2 = `SELECT co.*, c.course_name, t.term_label
+                      FROM class_offering co
+                      JOIN course c ON c.course_code = co.course_code
+                      JOIN term t ON t.term_id = co.term_id
+                      WHERE co.class_offering_id = ?`;
+        let parameters2 = [r.insertId];
+        const [rows] = await pool.execute(query2, parameters2);
+        // Return
+        // rows is an array of results. rows[0] = the inserted instructor.
+        // status(201) = HTTP code “Created”.
+        res.status(201).json(rows[0]);
+    } catch (e) { 
+        // Catch any error
+        // If anything goes wrong, undo everything.
+        next(e); 
+    }
 });
 
 // READ (with joins and filters)
+// [GET /class-offerings]
 router.get('/', async (req, res, next) => {
-  try {
-    const { term_id, course_code } = req.query;
-    let sql = `
-      SELECT co.*, c.course_name, t.term_label
-      FROM class_offering co
-      JOIN course c ON c.course_code = co.course_code
-      JOIN term t   ON t.term_id = co.term_id
-      WHERE 1=1`;
-    const params = [];
-    if (term_id) { sql += ` AND co.term_id = ?`; params.push(term_id); }
-    if (course_code) { sql += ` AND co.course_code = ?`; params.push(course_code); }
-    sql += ` ORDER BY co.class_offering_id DESC`;
-
-    const [rows] = await pool.execute(sql, params);
-    res.json(rows);
-  } catch (e) { next(e); }
+    try {
+        const { q } = req.query;
+        // build query
+        let query = `SELECT co.*, c.course_name, t.term_label
+                     FROM class_offering co
+                     JOIN course c ON c.course_code = co.course_code
+                     JOIN term t ON t.term_id = co.term_id`;
+        const parameters = [];
+        if (q) { 
+            query += ` WHERE (co.course_code LIKE ? OR c.course_name LIKE ?)`;
+            parameters.push(`%${q}%`, `%${q}%`);
+        }
+        query += ` ORDER BY co.class_offering_id DESC`;
+        const [rows] = await pool.execute(query, parameters);
+        // Optional search via req.query → adapt SQL → return array of rows.
+        res.json(rows);
+    } catch (e) {
+        // Catch any error
+        next(e);
+    }
 });
 
 // UPDATE
+// [PUT /class-offerings/:id]
 router.put('/:id', async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { course_code, term_id, class_group, class_type } = req.body;
-    const [r] = await pool.execute(
-      `UPDATE class_offering SET course_code = ?, term_id = ?, class_group = ?, class_type = ?
-       WHERE class_offering_id = ?`,
-      [course_code, term_id, class_group, class_type, id]
-    );
-    if (!r.affectedRows) return res.status(404).json({ error: 'Not found' });
-    const [rows] = await pool.execute(
-      `SELECT co.*, c.course_name, t.term_label
-       FROM class_offering co
-       JOIN course c ON c.course_code = co.course_code
-       JOIN term t   ON t.term_id = co.term_id
-       WHERE co.class_offering_id = ?`,
-      [id]
-    );
-    res.json(rows[0]);
-  } catch (e) { next(e); }
+    try {
+        // Get data from the request parameter
+        const { id } = req.params;
+        // Get data from the request body
+        const { course_code, term_id, class_group, class_type } = req.body;
+        // Execute the query
+        let query = `UPDATE class_offering 
+                     SET course_code = ?, term_id = ?, class_group = ?, class_type = ?
+                     WHERE class_offering_id = ?`;
+        let parameters = [course_code, term_id, class_group, class_type, id]
+        const [result] = await pool.execute(query, parameters);
+        // Check if anything changed. If not, error 404
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Not found' });
+        }
+        // Execute the query. Return the updated row. This is to see whether info is correct or not.
+        let query2 = `SELECT co.*, c.course_name, t.term_label
+                      FROM class_offering co
+                      JOIN course c ON c.course_code = co.course_code
+                      JOIN term t ON t.term_id = co.term_id
+                      WHERE co.class_offering_id = ?`;
+        let parameters2 = [id];
+        const [rows] = await pool.execute(query2, parameters2);
+        res.json(rows[0]);
+    } catch (e) { 
+        // Catch any error
+        next(e); 
+    }
 });
 
 // DELETE
+// [DELETE /class-offerings/:id]
 router.delete('/:id', async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const [r] = await pool.execute(`DELETE FROM class_offering WHERE class_offering_id = ?`, [id]);
-    if (!r.affectedRows) return res.status(404).json({ error: 'Not found' });
-    res.status(204).end();
-  } catch (e) { next(e); }
+    try {
+        // Get data from the request parameter
+        const { id } = req.params;
+        // Execute the query
+        let query = `DELETE FROM class_offering 
+                     WHERE class_offering_id = ?`;
+        let parameters = [id];
+        const [result] = await pool.execute(query, parameters);
+        // Check if anything deleted. If not, error 404. 
+        // If affectedRows = 0 → nothing matched the WHERE condition → the course does NOT exist
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Not found' });
+        }
+        // Return "success but no response body" (204)
+        res.status(204).end();
+    } catch (e) {
+        next(e);
+    }
 });
 
 module.exports = router;
