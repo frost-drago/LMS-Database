@@ -1,7 +1,9 @@
+// src/Student.js
 import React, { useEffect, useState } from 'react';
 import { NavLink, Routes, Route, useLocation, useParams } from 'react-router-dom';
 
 import StudentClassOffering from './pages/StudentClassOffering';
+import StudentClassSessions from './pages/StudentClassSessions'; // NEW
 
 const navStyle = ({ isActive }) =>
   isActive ? 'nav-link nav-link-active' : 'nav-link';
@@ -16,7 +18,11 @@ export default function Student() {
     if (!student) {
       (async () => {
         try {
-          const res = await fetch(`http://localhost:4000/auth/student/${encodeURIComponent(student_id)}`);
+          const res = await fetch(
+            `http://localhost:4000/auth/student/${encodeURIComponent(
+              student_id
+            )}`
+          );
           if (!res.ok) {
             setError('Student not found.');
             return;
@@ -55,8 +61,10 @@ export default function Student() {
         Welcome, student ID: <strong>{student.student_id}</strong>
       </p>
       <p className="placeholder-text">
-        <strong>Full name:</strong> {student.full_name}<br />
-        <strong>Email:</strong> {student.email}<br />
+        <strong>Full name:</strong> {student.full_name}
+        <br />
+        <strong>Email:</strong> {student.email}
+        <br />
         <strong>Cohort:</strong> {student.cohort ?? '-'}
       </p>
 
@@ -73,8 +81,11 @@ export default function Student() {
       {/* --- Student sub-routes --- */}
       <Routes>
         <Route path="class-offerings" element={<StudentClassOffering />} />
+        <Route
+          path="class-offerings/:class_offering_id/sessions"
+          element={<StudentClassSessions />}
+        />
       </Routes>
-
     </div>
   );
 }

@@ -208,4 +208,51 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
+// READ sessions with this student's grades + attendance
+// [GET /class-sessions/by-student/:student_id/:class_offering_id]
+router.get('/by-student/:student_id/:class_offering_id', async (req, res, next) => {
+    try {
+        const { student_id, class_offering_id } = req.params;
+
+        const sql = `
+            SELECT
+                cs.session_id,
+                cs.session_no,
+                cs.session_start_date,
+                cs.session_end_date,
+                cs.title,
+                cs.room,
+                -- enrolment info
+                e.enrolment_id,
+                -- grades + attendance (may be NULL if not yet recorded)
+                ga.record_id,
+                ga.assessment_type,
+                ga.score,
+                ga.weight,
+                ga.attendance_status
+            FROM class_session cs
+            -- make sure sessions belong to this class
+            JOIN class_offering co
+                ON co.class_offering_id = cs.class_offering_id
+            -- this student's enrolment in that class
+            JOIN enrolment e
+                ON e.class_offering_id = cs.class_offering_id
+            AND e.student_id = ?
+            -- the grade/attendance for that (enrolment, session) pair
+            LEFT JOIN grades_and_attendance ga
+                ON ga.session_id = cs.session_id
+            AND ga.enrolment_id = e.enrolment_id
+            WHERE cs.class_offering_id = ?
+            ORDER BY cs.session_start_date, cs.session_no
+        `;
+
+        const params = [student_id, class_offering_id];
+        const [rows] = await pool.execute(sql, params);
+        res.json(rows);
+    } catch (e) {
+        next(e);
+    }
+});
+
+
 module.exports = router;

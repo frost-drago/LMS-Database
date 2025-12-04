@@ -1,8 +1,10 @@
+// src/pages/StudentClassOffering.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function StudentClassOffering() {
   const { student_id } = useParams();
+  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,17 @@ export default function StudentClassOffering() {
     loadClasses();
   }, [student_id]);
 
+  const handleViewSessions = (co) => {
+    navigate(
+      `/student/${encodeURIComponent(
+        student_id
+      )}/class-offerings/${co.class_offering_id}/sessions`,
+      {
+        state: { classOffering: co }, // pass info for nice title
+      }
+    );
+  };
+
   return (
     <div className="container-centered">
       <h1 className="title">My Class Offerings</h1>
@@ -63,6 +76,13 @@ export default function StudentClassOffering() {
                 <br />
                 <strong>Enrolled at:</strong> {co.enroled_at ?? '-'}
               </p>
+              <button
+                type="button"
+                className="nav-link"
+                onClick={() => handleViewSessions(co)}
+              >
+                View Sessions
+              </button>
             </div>
           ))}
         </div>
