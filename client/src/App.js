@@ -8,7 +8,7 @@ import {
   useParams,
 } from 'react-router-dom';
 
-import StudentHomepage from './pages/StudentHomepage';
+import Student from './Student';
 import InstructorHomepage from './pages/InstructorHomepage';
 import Admin from './Admin';
 
@@ -106,7 +106,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<SelectUserPage />} />
-        <Route path="/student/:student_id/homepage" element={<StudentHomepage />} />
+        <Route path="/student/:student_id/*" element={<Student />} />
         <Route path="/instructor/:instructor_id/homepage" element={<InstructorHomepage />} />
         <Route path="/admin/*" element={<Admin />} />
       </Routes>

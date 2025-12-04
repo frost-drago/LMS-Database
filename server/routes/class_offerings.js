@@ -65,6 +65,40 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+// READ class offerings for a particular student
+// [GET /class-offerings/by-student/:student_id]
+router.get('/by-student/:student_id', async (req, res, next) => {
+    try {
+        const { student_id } = req.params;
+
+        let query = `
+            SELECT 
+                co.class_offering_id,
+                co.course_code,
+                co.term_id,
+                co.class_group,
+                co.class_type,
+                c.course_name,
+                t.term_label,
+                e.enrolment_status,
+                e.enroled_at
+            FROM enrolment e
+            JOIN class_offering co ON co.class_offering_id = e.class_offering_id
+            JOIN course c ON c.course_code = co.course_code
+            JOIN term t ON t.term_id = co.term_id
+            WHERE e.student_id = ?
+            ORDER BY t.start_date DESC, co.course_code, co.class_group
+        `;
+        const parameters = [student_id];
+
+        const [rows] = await pool.execute(query, parameters);
+        res.json(rows);  // array of class offerings for that student
+    } catch (e) {
+        next(e);
+    }
+});
+
+
 // UPDATE
 // [PUT /class-offerings/:id]
 router.put('/:id', async (req, res, next) => {

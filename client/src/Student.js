@@ -1,6 +1,10 @@
-// src/Student.js
 import React, { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { NavLink, Routes, Route, useLocation, useParams } from 'react-router-dom';
+
+import StudentClassOffering from './pages/StudentClassOffering';
+
+const navStyle = ({ isActive }) =>
+  isActive ? 'nav-link nav-link-active' : 'nav-link';
 
 export default function Student() {
   const { student_id } = useParams();
@@ -9,12 +13,10 @@ export default function Student() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // If we didn't get data via navigation state (e.g. user refreshed),
-    // fetch it directly from backend.
     if (!student) {
       (async () => {
         try {
-          const res = await fetch(`http://localhost:3000/auth/student/${encodeURIComponent(student_id)}`);
+          const res = await fetch(`http://localhost:4000/auth/student/${encodeURIComponent(student_id)}`);
           if (!res.ok) {
             setError('Student not found.');
             return;
@@ -57,6 +59,22 @@ export default function Student() {
         <strong>Email:</strong> {student.email}<br />
         <strong>Cohort:</strong> {student.cohort ?? '-'}
       </p>
+
+      {/* --- Navigation buttons --- */}
+      <div className="nav-row">
+        <NavLink
+          to={`/student/${student_id}/class-offerings`}
+          className={navStyle}
+        >
+          Class Offerings
+        </NavLink>
+      </div>
+
+      {/* --- Student sub-routes --- */}
+      <Routes>
+        <Route path="class-offerings" element={<StudentClassOffering />} />
+      </Routes>
+
     </div>
   );
 }
