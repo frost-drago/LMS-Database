@@ -22,16 +22,16 @@ export default function Admin() {
       <h1 className="title">LMS Admin</h1>
 
       <div className="nav-row">
-        <NavLink to="courses" className={navStyle}>Courses</NavLink>
-        <NavLink to="people" className={navStyle}>People</NavLink>
-        <NavLink to="students" className={navStyle}>Students</NavLink>
-        <NavLink to="instructors" className={navStyle}>Instructors</NavLink>
-        <NavLink to="terms" className={navStyle}>Terms</NavLink>
-        <NavLink to="class-offerings" className={navStyle}>Class Offerings</NavLink>
-        <NavLink to="teaching-assignments" className={navStyle}>Teaching Assignments</NavLink>
-        <NavLink to="class-sessions" className={navStyle}>Class Sessions</NavLink>
-        <NavLink to="enrolments" className={navStyle}>Enrolments</NavLink>
-        <NavLink to="grades-attendance" className={navStyle}>Grades and Attendance</NavLink>
+        <NavLink to="/admin/courses" className={navStyle}>Courses</NavLink>
+        <NavLink to="/admin/people" className={navStyle}>People</NavLink>
+        <NavLink to="/admin/students" className={navStyle}>Students</NavLink>
+        <NavLink to="/admin/instructors" className={navStyle}>Instructors</NavLink>
+        <NavLink to="/admin/terms" className={navStyle}>Terms</NavLink>
+        <NavLink to="/admin/class-offerings" className={navStyle}>Class Offerings</NavLink>
+        <NavLink to="/admin/teaching-assignments" className={navStyle}>Teaching Assignments</NavLink>
+        <NavLink to="/admin/class-sessions" className={navStyle}>Class Sessions</NavLink>
+        <NavLink to="/admin/enrolments" className={navStyle}>Enrolments</NavLink>
+        <NavLink to="/admin/grades-attendance" className={navStyle}>Grades and Attendance</NavLink>
       </div>
 
       <Routes>

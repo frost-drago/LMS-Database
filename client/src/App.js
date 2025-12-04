@@ -8,19 +8,9 @@ import {
   useParams,
 } from 'react-router-dom';
 
-import CoursesPage from './pages/CoursesPage';
-import PeoplePage from './pages/PeoplePage';
-import StudentsPage from './pages/StudentsPage';
-import InstructorsPage from './pages/InstructorsPage';
-import TermsPage from './pages/TermsPage';
-import ClassOfferingsPage from './pages/ClassOfferingsPage';
-import TeachingAssignmentsPage from './pages/TeachingAssignmentsPage';
-import ClassSessionsPage from './pages/ClassSessionsPage';
-import EnrolmentsPage from './pages/EnrolmentsPage';
-import GradesAttendancePage from './pages/GradesAttendancePage';
-
 import StudentHomepage from './pages/StudentHomepage';
 import InstructorHomepage from './pages/InstructorHomepage';
+import Admin from './Admin';
 
 import './App.css';
 
@@ -34,7 +24,7 @@ function SelectUserPage() {
   const [studentId, setStudentId] = useState('');
   const [instructorId, setInstructorId] = useState('');
 
-  const goAdmin = () => navigate('/courses');
+  const goAdmin = () => navigate('/admin/courses');
 
   const goStudent = async () => {
     const trimmed = studentId.trim();
@@ -111,42 +101,6 @@ function SelectUserPage() {
   );
 }
 
-
-// --- Admin layout ---
-function AdminLayout() {
-  return (
-    <div className="container-centered">
-      <h1 className="title">LMS Admin</h1>
-
-      <div className="nav-row">
-        <NavLink to="/courses" className={navStyle}>Courses</NavLink>
-        <NavLink to="/people" className={navStyle}>People</NavLink>
-        <NavLink to="/students" className={navStyle}>Students</NavLink>
-        <NavLink to="/instructors" className={navStyle}>Instructors</NavLink>
-        <NavLink to="/terms" className={navStyle}>Terms</NavLink>
-        <NavLink to="/class-offerings" className={navStyle}>Class Offerings</NavLink>
-        <NavLink to="/teaching-assignments" className={navStyle}>Teaching Assignments</NavLink>
-        <NavLink to="/class-sessions" className={navStyle}>Class Sessions</NavLink>
-        <NavLink to="/enrolments" className={navStyle}>Enrolments</NavLink>
-        <NavLink to="/grades-attendance" className={navStyle}>Grades and Attendance</NavLink>
-      </div>
-
-      <Routes>
-        <Route path="/courses" element={<CoursesPage />} />
-        <Route path="/people" element={<PeoplePage />} />
-        <Route path="/students" element={<StudentsPage />} />
-        <Route path="/instructors" element={<InstructorsPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/class-offerings" element={<ClassOfferingsPage />} />
-        <Route path="/teaching-assignments" element={<TeachingAssignmentsPage />} />
-        <Route path="/class-sessions" element={<ClassSessionsPage />} />
-        <Route path="/enrolments" element={<EnrolmentsPage />} />
-        <Route path="/grades-attendance" element={<GradesAttendancePage />} />
-      </Routes>
-    </div>
-  );
-}
-
 export default function App() {
   return (
     <Router>
@@ -154,7 +108,7 @@ export default function App() {
         <Route path="/" element={<SelectUserPage />} />
         <Route path="/student/:student_id/homepage" element={<StudentHomepage />} />
         <Route path="/instructor/:instructor_id/homepage" element={<InstructorHomepage />} />
-        <Route path="/*" element={<AdminLayout />} />
+        <Route path="/admin/*" element={<Admin />} />
       </Routes>
     </Router>
   );
