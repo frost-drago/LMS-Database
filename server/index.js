@@ -8,8 +8,13 @@ const students = require('./routes/students');
 const instructors = require('./routes/instructors');
 const terms = require('./routes/terms');
 const classOfferings = require('./routes/class_offerings');
+const teachingAssignments = require('./routes/teaching_assignment');
+const classSessions = require('./routes/class_session');
 const enrolments = require('./routes/enrolments');
 const gradesAttendance = require('./routes/grades_attendance');
+
+const authRouter = require('./routes/auth');
+
 
 const app = express();
 app.use(cors());
@@ -22,14 +27,18 @@ app.use('/api/students', students);
 app.use('/api/instructors', instructors);
 app.use('/api/terms', terms);
 app.use('/api/class-offerings', classOfferings);
+app.use('/api/teaching-assignments', teachingAssignments);
+app.use('/api/class-sessions', classSessions);
 app.use('/api/enrolments', enrolments);
 app.use('/api/grades-attendance', gradesAttendance);
 
+app.use('/auth', authRouter);
+
 // Error guard
 app.use((err, _req, res, _next) => {
-  console.error(err);
-  if (err.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Duplicate/unique constraint' });
-  return res.status(500).json({ error: 'Server error' });
+    console.error(err);
+    if (err.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Duplicate/unique constraint' });
+    return res.status(500).json({ error: 'Server error' });
 });
 
 const PORT = process.env.PORT || 4000;

@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS grades_and_attendance (
     score TINYINT UNSIGNED NOT NULL, -- on the assumption that grades are not floats
     weight TINYINT UNSIGNED NOT NULL, -- on the assumption that weights are not floats
     attendance_status ENUM('Verified','Pending','Not attended') NOT NULL default 'Not attended',
+    PRIMARY KEY (record_id),
     FOREIGN KEY (enrolment_id) REFERENCES enrolment (enrolment_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (session_id) REFERENCES class_session (session_id) ON DELETE CASCADE ON UPDATE CASCADE,
     
