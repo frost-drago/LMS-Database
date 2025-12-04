@@ -19,6 +19,9 @@ import ClassSessionsPage from './pages/ClassSessionsPage';
 import EnrolmentsPage from './pages/EnrolmentsPage';
 import GradesAttendancePage from './pages/GradesAttendancePage';
 
+import StudentHomepage from './pages/StudentHomepage';
+import InstructorHomepage from './pages/InstructorHomepage';
+
 import './App.css';
 
 // Convert nav style function → returns className
@@ -32,13 +35,43 @@ function SelectUserPage() {
   const [instructorId, setInstructorId] = useState('');
 
   const goAdmin = () => navigate('/courses');
-  const goStudent = () => {
+
+  const goStudent = async () => {
     const trimmed = studentId.trim();
-    if (trimmed) navigate(`/${trimmed}/homepage`);
+    if (!trimmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:4000/auth/student/${encodeURIComponent(trimmed)}`);
+      if (!res.ok) {
+        alert("Student ID not found.");
+        return;
+      }
+      const data = await res.json();
+
+      navigate(`/student/${trimmed}/homepage`, { state: { student: data } });
+
+    } catch (err) {
+      alert("Failed to connect to server.");
+    }
   };
-  const goInstructor = () => {
+
+  const goInstructor = async () => {
     const trimmed = instructorId.trim();
-    if (trimmed) navigate(`/${trimmed}/homepage`);
+    if (!trimmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:4000/auth/instructor/${encodeURIComponent(trimmed)}`);
+      if (!res.ok) {
+        alert("Instructor ID not found.");
+        return;
+      }
+      const data = await res.json();
+
+      navigate(`/instructor/${trimmed}/homepage`, { state: { instructor: data } });
+
+    } catch (err) {
+      alert("Failed to connect to server.");
+    }
   };
 
   return (
@@ -78,33 +111,6 @@ function SelectUserPage() {
   );
 }
 
-// --- New: StudentHomepage ---
-function StudentHomepage() {
-  const { student_id } = useParams();
-  return (
-    <div className="container-centered">
-      <h1 className="title">Student Homepage</h1>
-      <p className="subtitle">Welcome, student ID: <strong>{student_id}</strong></p>
-      <p className="placeholder-text">
-        This is where you can later show student-specific data (e.g. enrolments, grades).
-      </p>
-    </div>
-  );
-}
-
-// --- New: InstructorHomepage ---
-function InstructorHomepage() {
-  const { instructor_id } = useParams();
-  return (
-    <div className="container-centered">
-      <h1 className="title">Instructor Homepage</h1>
-      <p className="subtitle">Welcome, instructor ID: <strong>{instructor_id}</strong></p>
-      <p className="placeholder-text">
-        This is where you can later show instructor-specific data.
-      </p>
-    </div>
-  );
-}
 
 // --- Admin layout ---
 function AdminLayout() {
@@ -146,8 +152,8 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<SelectUserPage />} />
-        <Route path="/:student_id/homepage" element={<StudentHomepage />} />
-        <Route path="/:instructor_id/homepage" element={<InstructorHomepage />} />
+        <Route path="/student/:student_id/homepage" element={<StudentHomepage />} />
+        <Route path="/instructor/:instructor_id/homepage" element={<InstructorHomepage />} />
         <Route path="/*" element={<AdminLayout />} />
       </Routes>
     </Router>
