@@ -4,7 +4,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './StudentsPage.css';
+import './Styles.css';
 
 const ATTENDANCE_OPTIONS = ['Verified', 'Pending', 'Not attended'];
 
@@ -219,6 +219,7 @@ export default function InstructorSessionAttendance() {
         <thead>
           <tr>
             <th>Record ID</th>
+            <th>Student</th>
             <th>Enrolment ID</th>
             <th>Assessment Type</th>
             <th>Score</th>
@@ -231,6 +232,10 @@ export default function InstructorSessionAttendance() {
           {rows.map((r) => (
             <tr key={r.record_id}>
               <td>{r.record_id}</td>
+              <td>
+                {r.student_name} <br />
+                <small>{r.student_id}</small>
+              </td>
               <td>{r.enrolment_id}</td>
               <td>
                 {editingId === r.record_id ? (

@@ -1,8 +1,11 @@
-.people-page {
+/* Page wrappers */
+.students-page,
+.people-page,
+.courses-page {
   padding: 0;
 }
 
-/* Search row */
+/* 🔍 Search row (People + Courses) */
 .search-row {
   display: flex;
   gap: 8px;
@@ -17,7 +20,8 @@
   flex: 1;
 }
 
-/* Create form */
+/* 📋 Form containers (Students = .form-box, People/Courses = .create-form) */
+.form-box,
 .create-form {
   border: 1px solid #eee;
   padding: 16px;
@@ -25,10 +29,12 @@
   margin-bottom: 20px;
 }
 
+.form-box h3,
 .create-form h3 {
   margin-top: 0;
 }
 
+/* Shared form layout */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -39,26 +45,42 @@
   margin-top: 10px;
 }
 
-/* Table */
-.people-table {
+/* 📊 Tables (Students, People, Courses) */
+.students-table,
+.people-table,
+.courses-table {
   border-collapse: collapse;
   width: 100%;
 }
 
-.people-table thead tr {
+.students-table thead tr,
+.people-table thead tr,
+.courses-table thead tr {
   text-align: left;
   border-bottom: 1px solid #eee;
 }
 
-.people-table tbody tr {
+.students-table tbody tr,
+.people-table tbody tr,
+.courses-table tbody tr {
   border-bottom: 1px solid #f2f2f2;
 }
 
+/* Actions column */
 .actions-cell {
   white-space: nowrap;
 }
 
-/* Empty row */
+/* Page-specific tweaks */
+.cohort-input {
+  width: 100px;
+}
+
+.credit-input {
+  width: 80px;
+}
+
+/* Empty-table row */
 .no-data {
   padding: 24px;
   text-align: center;

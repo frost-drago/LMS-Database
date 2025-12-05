@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './StudentsPage.css';
+import './Styles.css';
 
 const ATTENDANCE_OPTIONS = ['Verified', 'Pending', 'Not attended'];
 
@@ -212,6 +212,7 @@ export default function GradesAttendancePage() {
         <thead>
           <tr>
             <th>Record ID</th>
+            <th>Student</th> 
             <th>Enrolment ID</th>
             <th>Session ID</th>
             <th>Assessment Type</th>
@@ -225,6 +226,11 @@ export default function GradesAttendancePage() {
           {rows.map(r => (
             <tr key={r.record_id}>
               <td>{r.record_id}</td>
+              <td>
+                {r.student_name} <br />
+                <small>{r.student_id}</small>
+              </td>
+
               <td>{r.enrolment_id}</td>
               <td>{r.session_id}</td>
               <td>

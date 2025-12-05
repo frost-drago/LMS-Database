@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './StudentsPage.css'; // reuse same styling: .form-box, .form-grid, .students-table, etc.
+import './Styles.css';
 
 // Helpers to convert between MySQL DATETIME strings and <input type="datetime-local">
 function toInputDateTime(value) {

@@ -1,6 +1,7 @@
 // src/pages/InstructorTeachingAssignments.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import './Styles.css';
 
 export default function InstructorTeachingAssignments() {
   const { instructor_id } = useParams();

@@ -4,7 +4,7 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './StudentsPage.css'; // reuse same styling
+import './Styles.css';
 
 // Helpers to convert between MySQL DATETIME strings and <input type="datetime-local">
 function toInputDateTime(value) {

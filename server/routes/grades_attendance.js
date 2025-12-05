@@ -20,14 +20,43 @@ router.post('/', async (req, res, next) => {
 router.get('/', async (req, res, next) => {
     try {
         const { enrolment_id, session_id } = req.query;
-        let sql = `SELECT * FROM grades_and_attendance WHERE 1=1`;
+
+        let sql = `
+        SELECT
+            ga.record_id,
+            ga.enrolment_id,
+            ga.session_id,
+            ga.assessment_type,
+            ga.score,
+            ga.weight,
+            ga.attendance_status,
+
+            -- Student info
+            e.student_id,
+            p.full_name AS student_name,
+            p.email AS student_email
+
+        FROM grades_and_attendance ga
+        JOIN enrolment e ON e.enrolment_id = ga.enrolment_id
+        JOIN student s ON s.student_id = e.student_id
+        JOIN person p ON p.person_id = s.person_id
+
+        WHERE 1=1
+        `;
+
         const params = [];
-        if (enrolment_id) { sql += ` AND enrolment_id = ?`; params.push(enrolment_id); }
-        if (session_id) { sql += ` AND session_id = ?`; params.push(session_id); }
-        sql += ` ORDER BY record_id DESC`;
+
+        if (enrolment_id) { sql += ` AND ga.enrolment_id = ?`; params.push(enrolment_id); }
+        if (session_id)   { sql += ` AND ga.session_id = ?`; params.push(session_id); }
+
+        sql += ` ORDER BY p.full_name, ga.record_id`;
+
         const [rows] = await pool.execute(sql, params);
         res.json(rows);
-    } catch (e) { next(e); }
+
+    } catch (e) {
+        next(e);
+    }
 });
 
 // READ: all grades & attendance for one class offering

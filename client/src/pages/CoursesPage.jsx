@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './CoursesPage.css';
+import './Styles.css';
 
 export default function CoursesPage() {
   const [items, setItems] = useState([]);

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './StudentsPage.css'; // reuse same styling
+import './Styles.css';
 
 export default function InstructorsPage() {
   const [rows, setRows] = useState([]);

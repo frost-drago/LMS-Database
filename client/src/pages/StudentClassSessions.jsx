@@ -1,6 +1,7 @@
 // src/pages/StudentClassSessions.jsx
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import './Styles.css';
 
 export default function StudentClassSessions() {
   const { student_id, class_offering_id } = useParams();

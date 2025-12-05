@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import ConfirmButton from '../components/ConfirmButton';
-import './CoursesPage.css'; // use same styling as CoursesPage
+import './Styles.css';
 
 const ROLES = ['Lecturer', 'TA', 'Tutor', 'Grader'];
 

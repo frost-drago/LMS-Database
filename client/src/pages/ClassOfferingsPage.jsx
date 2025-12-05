@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api, getErrorMessage } from '../api';
 import FormField from '../components/FormField';
 import ConfirmButton from '../components/ConfirmButton';
-import './StudentsPage.css'; // reuse existing styles
+import './Styles.css'; // reuse existing styles
 
 export default function ClassOfferingsPage() {
   const [rows, setRows] = useState([]);
