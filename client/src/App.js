@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 
 import Student from './Student';
-import InstructorHomepage from './pages/InstructorHomepage';
+import Instructor from './Instructor';
 import Admin from './Admin';
 
 import './App.css';
@@ -107,7 +107,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<SelectUserPage />} />
         <Route path="/student/:student_id/*" element={<Student />} />
-        <Route path="/instructor/:instructor_id/homepage" element={<InstructorHomepage />} />
+        <Route path="/instructor/:instructor_id/*" element={<Instructor />} />
         <Route path="/admin/*" element={<Admin />} />
       </Routes>
     </Router>

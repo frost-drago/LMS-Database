@@ -30,6 +30,70 @@ router.get('/', async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
+// READ: all grades & attendance for one class offering
+// [GET /grades-attendance/by-class-offering/:class_offering_id]
+router.get('/by-class-offering/:class_offering_id', async (req, res, next) => {
+    try {
+        const { class_offering_id } = req.params;
+
+        /*
+           Schema recap:
+           - class_session(session_id, class_offering_id, session_no,
+                          session_start_date, session_end_date, title, room)
+           - enrolment(enrolment_id, class_offering_id, student_id, enrolment_status, ...)
+           - student(person_id, student_id, cohort)
+           - person(person_id, full_name, email, ...)
+           - grades_and_attendance(record_id, enrolment_id, session_id,
+                                   assessment_type, score, weight, attendance_status)
+        */
+
+        const sql = `
+            SELECT
+                ga.record_id,
+                ga.enrolment_id,
+                ga.session_id,
+                ga.assessment_type,
+                ga.score,
+                ga.weight,
+                ga.attendance_status,
+
+                -- session info
+                cs.class_offering_id,
+                cs.session_no,
+                cs.session_start_date,
+                cs.session_end_date,
+                cs.title       AS session_title,
+                cs.room,
+
+                -- enrolment / student info
+                e.student_id,
+                e.enrolment_status,
+                p.full_name    AS student_name,
+                p.email        AS student_email
+            FROM grades_and_attendance ga
+            JOIN class_session cs
+                ON cs.session_id = ga.session_id
+            JOIN enrolment e
+                ON e.enrolment_id = ga.enrolment_id
+            JOIN student s
+                ON s.student_id = e.student_id
+            JOIN person p
+                ON p.person_id = s.person_id
+            WHERE cs.class_offering_id = ?
+            ORDER BY
+                cs.session_no,
+                p.full_name,
+                ga.record_id
+        `;
+
+        const [rows] = await pool.execute(sql, [class_offering_id]);
+        res.json(rows);
+    } catch (e) {
+        next(e);
+    }
+});
+
+
 // UPDATE
 router.put('/:record_id', async (req, res, next) => {
     try {

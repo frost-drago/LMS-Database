@@ -98,6 +98,51 @@ router.get('/by-student/:student_id', async (req, res, next) => {
     }
 });
 
+// READ all classes that one instructor teaches in
+// [GET /class-offerings/by-instructor/:instructor_id]
+router.get('/by-instructor/:instructor_id', async (req, res, next) => {
+    try {
+        const { instructor_id } = req.params;
+
+        // Join teaching_assignment → class_offering → course → term
+        let query = `
+            SELECT
+                co.class_offering_id,
+                co.course_code,
+                c.course_name,
+                c.credit,
+                co.term_id,
+                t.term_label,
+                t.start_date,
+                t.end_date,
+                co.class_group,
+                co.class_type,
+                ta.teaching_role
+            FROM class_offering co
+            JOIN teaching_assignment ta
+                ON ta.class_offering_id = co.class_offering_id
+            JOIN course c
+                ON c.course_code = co.course_code
+            JOIN term t
+                ON t.term_id = co.term_id
+            WHERE ta.instructor_id = ?
+            ORDER BY
+                t.start_date,
+                co.course_code,
+                co.class_group,
+                co.class_type,
+                co.class_offering_id
+        `;
+
+        const [rows] = await pool.execute(query, [instructor_id]);
+
+        // For list endpoints, just return [] if no rows.
+        return res.json(rows);
+    } catch (e) {
+        next(e);
+    }
+});
+
 
 // UPDATE
 // [PUT /class-offerings/:id]
