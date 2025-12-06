@@ -81,23 +81,72 @@
 }
 
 /* ===========================
-   Nav Links (Admin)
+   Nav Links (Admin + All Roles)
 =========================== */
 
 .nav-row {
-  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-top: 8px;
+  align-items: center;
 }
 
 .nav-link {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 8px;
   text-decoration: none;
   color: #333;
-  background: #eee;
-  margin-right: 8px;
+  background: #f5f5f5;
+  white-space: nowrap;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-link:hover {
+  background: #e6e6e6;
 }
 
 .nav-link-active {
   background: #111 !important;
   color: white !important;
+  border-color: #111 !important;
+}
+
+
+/* ===========================
+   Fix Select User Layout
+=========================== */
+
+.container-box {
+  width: 100%;
+  max-width: 380px;     /* slightly smaller layout */
+  margin: 48px auto;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* Stack student/instructor controls neatly */
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;            /* spacing between button + input */
+  margin-bottom: 24px;
+}
+
+/* Make input height visually match button height */
+.input-field {
+  height: 42px;
+  box-sizing: border-box;
+}
+
+/* Make buttons visually consistent */
+.btn {
+  height: 42px;
+  padding: 0 14px;
 }
