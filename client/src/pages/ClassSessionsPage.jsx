@@ -23,7 +23,6 @@ export default function ClassSessionsPage() {
   const [rows, setRows] = useState([]);
 
   // filters
-  const [filterOfferingId, setFilterOfferingId] = useState('');
   const [search, setSearch] = useState('');
 
   // create
@@ -43,36 +42,21 @@ export default function ClassSessionsPage() {
   const [eTitle, setETitle] = useState('');
   const [eRoom, setERoom] = useState('');
 
-  async function load(params = {}) {
+  async function load() { 
     try {
+      const params = search ? { q: search } : {};
       const { data } = await api.get('/class-sessions', { params });
       setRows(data);
     } catch (err) {
       alert(getErrorMessage(err));
     }
   }
-
+  
+  useEffect(() => { load(); }, []);
   useEffect(() => {
-    load();
-  }, []);
-
-  async function applyFilter(e) {
-    if (e) e.preventDefault();
-    try {
-      const params = {};
-      if (filterOfferingId) params.class_offering_id = filterOfferingId;
-      if (search) params.q = search;
-      await load(params);
-    } catch (err) {
-      alert(getErrorMessage(err));
-    }
-  }
-
-  function clearFilter() {
-    setFilterOfferingId('');
-    setSearch('');
-    load();
-  }
+    const t = setTimeout(load, 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   async function createSession(e) {
     e.preventDefault();
@@ -138,30 +122,15 @@ export default function ClassSessionsPage() {
       <h2>Class Sessions</h2>
 
       {/* Filter / Search */}
-      <form className="form-box" onSubmit={applyFilter}>
-        <h3>Filter Sessions</h3>
-        <div className="form-grid">
-          <FormField
-            label="Class Offering ID"
-            type="number"
-            value={filterOfferingId}
-            onChange={setFilterOfferingId}
-            placeholder="e.g. 1"
-          />
-          <FormField
-            label="Search"
-            value={search}
-            onChange={setSearch}
-            placeholder="title, room, course code..."
-          />
-        </div>
-        <div className="form-submit">
-          <button type="submit">Apply Filter</button>{' '}
-          <button type="button" onClick={clearFilter}>
-            Clear
-          </button>
-        </div>
-      </form>
+      <div className="search-row">
+        <input
+        className="search-input"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="Search title, room, course code..."
+        />
+        <button onClick={() => setSearch('')}>Clear</button>
+      </div>
 
       {/* Create session */}
       <form className="form-box" onSubmit={createSession}>
