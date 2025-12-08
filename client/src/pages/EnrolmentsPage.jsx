@@ -6,8 +6,7 @@ import './Styles.css';
 
 export default function EnrolmentsPage() {
   const [rows, setRows] = useState([]);
-  const [filterOffering, setFilterOffering] = useState('');
-  const [filterStudent, setFilterStudent] = useState('');
+  const [search, setSearch] = useState('');
 
   // create
   const [cOffering, setCOffering] = useState('');
@@ -20,8 +19,7 @@ export default function EnrolmentsPage() {
 
   async function load() {
     const params = {};
-    if (filterOffering) params.class_offering_id = filterOffering;
-    if (filterStudent) params.student_id = filterStudent;
+    if (search) params.student_id = search; 
     const { data } = await api.get('/enrolments', { params });
     setRows(data);
   }
@@ -30,7 +28,7 @@ export default function EnrolmentsPage() {
   useEffect(() => {
     const t = setTimeout(load, 300);
     return () => clearTimeout(t);
-  }, [filterOffering, filterStudent]);
+  }, [search]);
 
   async function createEnrolment(e) {
     e.preventDefault();
@@ -73,12 +71,16 @@ export default function EnrolmentsPage() {
 
   return (
     <div>
-      <h2>Enrolments</h2>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '12px 0 20px' }}>
-        <FormField label="Filter by Offering ID" value={filterOffering} onChange={setFilterOffering} />
-        <FormField label="Filter by Student ID" value={filterStudent} onChange={setFilterStudent} />
-      </div>
+      <h2>Enrollments</h2>
+      <div className="search-row">
+        <input
+          className="search-input"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by Student ID..."
+        />
+        <button onClick={() => setSearch('')}>Clear</button>
+      </div>
 
       <form onSubmit={createEnrolment} style={{ border: '1px solid #eee', padding: 16, borderRadius: 12, marginBottom: 20 }}>
         <h3 style={{ marginTop: 0 }}>Create Enrolment</h3>
