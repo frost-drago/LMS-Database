@@ -11,8 +11,7 @@ export default function GradesAttendancePage() {
   const [rows, setRows] = useState([]);
 
   // filters
-  const [filterEnrolmentId, setFilterEnrolmentId] = useState('');
-  const [filterSessionId, setFilterSessionId] = useState('');
+  const [searchSessionId, setSearchSessionId] = useState('');
 
   // create
   const [enrolment_id, setEnrolmentId] = useState('');
@@ -29,8 +28,10 @@ export default function GradesAttendancePage() {
   const [eWeight, setEWeight] = useState('');
   const [eAttendanceStatus, setEAttendanceStatus] = useState('Not attended');
 
-  async function load(params = {}) {
+  async function load() {
     try {
+      const params = {};
+      if (searchSessionId) params.session_id = searchSessionId; 
       const { data } = await api.get('/grades-attendance', { params });
       setRows(data);
     } catch (err) {
@@ -42,19 +43,10 @@ export default function GradesAttendancePage() {
     load();
   }, []);
 
-  async function applyFilter(e) {
-    if (e) e.preventDefault();
-    const params = {};
-    if (filterEnrolmentId) params.enrolment_id = filterEnrolmentId;
-    if (filterSessionId) params.session_id = filterSessionId;
-    await load(params);
-  }
-
-  function clearFilter() {
-    setFilterEnrolmentId('');
-    setFilterSessionId('');
-    load();
-  }
+  useEffect(() => {
+    const t = setTimeout(load, 300);
+    return () => clearTimeout(t);
+  }, [searchSessionId]);
 
   async function createRecord(e) {
     e.preventDefault();
@@ -118,32 +110,16 @@ export default function GradesAttendancePage() {
     <div className="students-page">
       <h2>Grades &amp; Attendance</h2>
 
-      {/* Filter */}
-      <form className="form-box" onSubmit={applyFilter}>
-        <h3>Filter Records</h3>
-        <div className="form-grid">
-          <FormField
-            label="Enrolment ID"
-            type="number"
-            value={filterEnrolmentId}
-            onChange={setFilterEnrolmentId}
-            placeholder="e.g. 1"
-          />
-          <FormField
-            label="Session ID"
-            type="number"
-            value={filterSessionId}
-            onChange={setFilterSessionId}
-            placeholder="e.g. 10"
-          />
-        </div>
-        <div className="form-submit">
-          <button type="submit">Apply Filter</button>{' '}
-          <button type="button" onClick={clearFilter}>
-            Clear
-          </button>
-        </div>
-      </form>
+      <div className="search-row">
+        <input
+          className="search-input"
+          type="number"
+          value={searchSessionId}
+          onChange={e => setSearchSessionId(e.target.value)}
+          placeholder="Search by Session ID..."
+        />
+        <button onClick={() => setSearchSessionId('')}>Clear</button>
+      </div>
 
       {/* Create */}
       <form className="form-box" onSubmit={createRecord}>
