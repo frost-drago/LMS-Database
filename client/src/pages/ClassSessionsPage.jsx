@@ -75,7 +75,7 @@ export default function ClassSessionsPage() {
       setSessionEndDate('');
       setTitle('');
       setRoom('');
-      applyFilter(); // reload with current filters (if any)
+      load(); 
     } catch (err) {
       alert(getErrorMessage(err));
     }
@@ -102,7 +102,7 @@ export default function ClassSessionsPage() {
         room: eRoom,
       });
       setEditingId(null);
-      applyFilter();
+      load(); 
     } catch (err) {
       alert(getErrorMessage(err));
     }
@@ -111,7 +111,7 @@ export default function ClassSessionsPage() {
   async function remove(session_id) {
     try {
       await api.delete(`/class-sessions/${session_id}`);
-      applyFilter();
+      load(); 
     } catch (err) {
       alert(getErrorMessage(err));
     }

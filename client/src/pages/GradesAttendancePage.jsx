@@ -68,7 +68,7 @@ export default function GradesAttendancePage() {
       setWeight('');
       setAttendanceStatus('Not attended');
 
-      applyFilter();
+      load(); 
     } catch (err) {
       alert(getErrorMessage(err));
     }
@@ -91,7 +91,7 @@ export default function GradesAttendancePage() {
         attendance_status: eAttendanceStatus,
       });
       setEditingId(null);
-      applyFilter();
+      load(); 
     } catch (err) {
       alert(getErrorMessage(err));
     }
@@ -100,7 +100,7 @@ export default function GradesAttendancePage() {
   async function remove(record_id) {
     try {
       await api.delete(`/grades-attendance/${record_id}`);
-      applyFilter();
+      load(); 
     } catch (err) {
       alert(getErrorMessage(err));
     }
