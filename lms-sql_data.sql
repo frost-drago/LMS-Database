@@ -6,14 +6,14 @@ INSERT INTO course (course_code, course_name, credit, course_description) VALUES
     ('COMP6049001', 'Algorithm Design and Analysis', 4, 'This course teaches how to calculate theoretical runtime.'),
     ('STAT617001', 'Basic Statistics', 2, 'This course was designed to teach students how to do statistics.');
     
-INSERT INTO person (person_id, full_name, email) VALUES
-	(1, 'Zuri Dawson', 'zdawson@university.id'),
-    (2, 'Iker Terry', 'iterry@university.id'),
-    (3, 'Wren Rowe', 'wrowe@university.id'),
-    (4, 'Kamden Norris', 'knorris@university.id'),
-    (5, 'Arielle Summers', 'asummers@university.id'),
-    (6, 'Darius Chandler', 'dchandler@university.id'),
-    (7, 'Viviana Kent', 'vkent@university.id');
+INSERT INTO person (full_name, email) VALUES
+	('Zuri Dawson', 'zdawson@university.id'),
+    ('Iker Terry', 'iterry@university.id'),
+    ('Wren Rowe', 'wrowe@university.id'),
+    ('Kamden Norris', 'knorris@university.id'),
+    ('Arielle Summers', 'asummers@university.id'),
+    ('Darius Chandler', 'dchandler@university.id'),
+    ('Viviana Kent', 'vkent@university.id');
     
 INSERT INTO student (person_id, student_id, cohort) VALUES
 	(1, 'U280010001', 'U28'),
@@ -54,3 +54,13 @@ INSERT INTO enrolment (class_offering_id, student_id, enrolment_status, enroled_
     (4, 'U280010001', 'Active', '2025-09-01 13:00:00'),
     (1, 'U280010002', 'Active', '2025-09-01 13:00:00'),
     (4, 'U280010002', 'Active', '2025-09-01 13:00:00');
+    
+INSERT INTO grades_and_attendance (enrolment_id, session_id, assessment_type, score, weight, attendance_status) VALUES
+	(1, 1, 'Attendance', 100, 0, 'Verified'),
+	(1, 2, 'Quiz', 0, 3, 'Not attended'),
+    (1, 3, 'Quiz', 0, 3, 'Not attended'),
+    (1, 4, 'Quiz', 0, 3, 'Not attended'),
+    (3, 1, 'Attendance', 100, 0, 'Verified'),
+	(3, 2, 'Quiz', 0, 3, 'Not attended'),
+    (3, 3, 'Quiz', 0, 3, 'Not attended'),
+    (3, 4, 'Quiz', 0, 3, 'Not attended');
