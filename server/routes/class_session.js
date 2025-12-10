@@ -8,6 +8,8 @@ const { pool } = require('../db');
 
 // CREATE
 // [POST /class-sessions]
+// CREATE
+// [POST /class-sessions]
 router.post('/', async (req, res, next) => {
     try {
         // Get data from the request body
@@ -20,7 +22,7 @@ router.post('/', async (req, res, next) => {
             room
         } = req.body;
 
-        // Insert into class_session
+        // 1) Insert into class_session
         let query = `
             INSERT INTO class_session 
                 (class_offering_id, session_no, session_start_date, session_end_date, title, room)
@@ -37,8 +39,47 @@ router.post('/', async (req, res, next) => {
         ];
 
         const [r] = await pool.execute(query, parameters);
+        const newSessionId = r.insertId;
 
-        // Fetch the inserted row with context (join class_offering, course, term)
+        // 2) Get all active enrolments for this class_offering
+        const [enrolments] = await pool.execute(
+            `
+            SELECT enrolment_id
+            FROM enrolment
+            WHERE class_offering_id = ?
+              AND enrolment_status = 'Active'
+            `,
+            [class_offering_id]
+        );
+
+        // 3) Create grades_and_attendance rows for each enrolled student
+        //    Default: assessment_type = 'Session', score = 0, weight = 0, attendance = 'Not attended'
+        if (enrolments.length > 0) {
+            const valuePlaceholders = [];
+            const gaParams = [];
+
+            enrolments.forEach(row => {
+                valuePlaceholders.push('(?, ?, ?, ?, ?, ?)');
+                gaParams.push(
+                    row.enrolment_id,     // enrolment_id
+                    newSessionId,         // session_id
+                    'Session',            // assessment_type (you can rename this if you want)
+                    0,                    // score (must be 0–100, NOT NULL)
+                    0,                    // weight (must be 0–100, NOT NULL)
+                    'Not attended'        // attendance_status
+                );
+            });
+
+            const gaSql = `
+                INSERT INTO grades_and_attendance
+                    (enrolment_id, session_id, assessment_type, score, weight, attendance_status)
+                VALUES ${valuePlaceholders.join(', ')}
+            `;
+
+            await pool.execute(gaSql, gaParams);
+        }
+
+        // 4) Fetch the inserted row with context (join class_offering, course, term)
         let query2 = `
             SELECT 
                 cs.*,
@@ -53,7 +94,7 @@ router.post('/', async (req, res, next) => {
             JOIN term t ON t.term_id = co.term_id
             WHERE cs.session_id = ?
         `;
-        let parameters2 = [r.insertId];
+        let parameters2 = [newSessionId];
         const [rows] = await pool.execute(query2, parameters2);
 
         // status(201) = HTTP code "Created"
@@ -63,6 +104,7 @@ router.post('/', async (req, res, next) => {
         next(e);
     }
 });
+
 
 // READ (with joins and optional filters/search)
 // [GET /class-sessions]

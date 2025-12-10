@@ -171,6 +171,29 @@ router.patch('/:record_id/attendance-pending', async (req, res, next) => {
     }
 });
 
+// [PATCH /grades-attendance/verify-all/:session_id]
+// Convert all "Pending" attendance in this session → "Verified"
+router.patch('/verify-all/:session_id', async (req, res, next) => {
+    try {
+        const { session_id } = req.params;
+
+        const [r] = await pool.execute(
+            `UPDATE grades_and_attendance
+             SET attendance_status = 'Verified'
+             WHERE session_id = ?
+               AND attendance_status = 'Pending'`,
+            [session_id]
+        );
+
+        res.json({
+            message: 'Updated successfully',
+            updated: r.affectedRows
+        });
+    } catch (e) {
+        next(e);
+    }
+});
+
 
 // DELETE
 router.delete('/:record_id', async (req, res, next) => {

@@ -114,6 +114,16 @@ export default function InstructorSessionAttendance() {
     }
   }
 
+  async function verifyAllPending() {
+    try {
+      await api.patch(`/grades-attendance/verify-all/${session_id}`);
+      load(); // refresh table
+    } catch (err) {
+      alert(getErrorMessage(err));
+    }
+  }
+
+
   async function remove(record_id) {
     try {
       await api.delete(`/grades-attendance/${record_id}`);
@@ -213,6 +223,13 @@ export default function InstructorSessionAttendance() {
           <button type="submit">Create</button>
         </div>
       </form>
+
+      {/* Verify all pending */}
+      <div style={{ marginTop: '20px', marginBottom: '10px' }}>
+        <button onClick={verifyAllPending}>
+          Verify All Pending Attendance
+        </button>
+      </div>
 
       {/* Table */}
       <table className="students-table" width="100%" cellPadding="8">
