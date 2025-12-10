@@ -120,7 +120,7 @@ CREATE INDEX index_enrolment_offering ON enrolment (class_offering_id);
 
 
 -- our lecturer told us to reduce the number of tables so we have this combined table now.
--- pretend that every session must have an attendance and grading on the spot.
+-- pretend that every session must have an attendance and grading on the spot.S
 CREATE TABLE IF NOT EXISTS grades_and_attendance (
 	record_id BIGINT AUTO_INCREMENT, -- already PK
     enrolment_id BIGINT NOT NULL,
