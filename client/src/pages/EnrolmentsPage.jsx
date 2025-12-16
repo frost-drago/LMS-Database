@@ -71,7 +71,7 @@ export default function EnrolmentsPage() {
 
   return (
     <div>
-      <h2>Enrollments</h2>
+      <h2>Enrolments</h2>
       <div className="search-row">
         <input
           className="search-input"
