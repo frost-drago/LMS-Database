@@ -11,7 +11,9 @@ import ClassOfferingsPage from './pages/ClassOfferingsPage';
 import TeachingAssignmentsPage from './pages/TeachingAssignmentsPage';
 import ClassSessionsPage from './pages/ClassSessionsPage';
 import EnrolmentsPage from './pages/EnrolmentsPage';
-import GradesAttendancePage from './pages/GradesAttendancePage';
+import AttendancePage from './pages/AttendancePage';
+import AssessmentTypesPage from './pages/AssessmentTypesPage';
+import GradesPage from './pages/GradesPage';
 
 const navStyle = ({ isActive }) =>
   isActive ? 'nav-link nav-link-active' : 'nav-link';
@@ -31,7 +33,9 @@ export default function Admin() {
         <NavLink to="/admin/teaching-assignments" className={navStyle}>Teaching Assignments</NavLink>
         <NavLink to="/admin/class-sessions" className={navStyle}>Class Sessions</NavLink>
         <NavLink to="/admin/enrolments" className={navStyle}>Enrolments</NavLink>
-        <NavLink to="/admin/grades-attendance" className={navStyle}>Grades and Attendance</NavLink>
+        <NavLink to="/admin/attendance" className={navStyle}>Attendance</NavLink>
+        <NavLink to="/admin/asessment-types" className={navStyle}>Assessment Types</NavLink>
+        <NavLink to="/admin/grades" className={navStyle}>Grades</NavLink>
       </div>
 
       <Routes>
@@ -44,7 +48,9 @@ export default function Admin() {
         <Route path="teaching-assignments" element={<TeachingAssignmentsPage />} />
         <Route path="class-sessions" element={<ClassSessionsPage />} />
         <Route path="enrolments" element={<EnrolmentsPage />} />
-        <Route path="grades-attendance" element={<GradesAttendancePage />} />
+        <Route path="attendance" element={<AttendancePage />} />
+        <Route path="asessment-types" element={<AssessmentTypesPage />} />
+        <Route path="grades" element={<GradesPage />} />
       </Routes>
     </div>
   );

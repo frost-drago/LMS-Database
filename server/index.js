@@ -11,7 +11,10 @@ const classOfferings = require('./routes/class_offerings');
 const teachingAssignments = require('./routes/teaching_assignment');
 const classSessions = require('./routes/class_session');
 const enrolments = require('./routes/enrolments');
-const gradesAttendance = require('./routes/grades_attendance');
+const attendance = require('./routes/attendance');
+const assessmentType = require('./routes/assessment_type');
+const grade = require('./routes/grade');
+
 
 const authRouter = require('./routes/auth');
 
@@ -30,7 +33,9 @@ app.use('/api/class-offerings', classOfferings);
 app.use('/api/teaching-assignments', teachingAssignments);
 app.use('/api/class-sessions', classSessions);
 app.use('/api/enrolments', enrolments);
-app.use('/api/grades-attendance', gradesAttendance);
+app.use('/api/attendance', attendance);
+app.use('/api/assessment-types', assessmentType);
+app.use('/api/grades', grade);
 
 app.use('/auth', authRouter);
 

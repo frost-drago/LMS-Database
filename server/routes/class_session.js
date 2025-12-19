@@ -106,6 +106,58 @@ router.post('/', async (req, res, next) => {
 });
 
 
+// GET /api/class-sessions/by-student/:student_id/:class_offering_id
+router.get('/by-student/:student_id/:class_offering_id', async (req, res) => {
+    const { student_id, class_offering_id } = req.params;
+
+    try {
+        // Find the enrolment for this student in this class offering
+        const [enrolRows] = await pool.execute(
+        `
+        SELECT enrolment_id
+        FROM enrolment
+        WHERE student_id = ? AND class_offering_id = ?
+        LIMIT 1
+        `,
+        [student_id, class_offering_id]
+        );
+
+        if (!enrolRows.length) {
+        return res.status(404).json({ message: 'Student not enrolled in this class offering' });
+        }
+
+        const enrolment_id = enrolRows[0].enrolment_id;
+
+        // List sessions + attendance status (normalized attendance table)
+        const [rows] = await pool.execute(
+        `
+        SELECT
+            cs.session_id,
+            cs.session_no,
+            cs.session_start_date,
+            cs.session_end_date,
+            cs.title,
+            cs.room,
+            ? AS enrolment_id,
+            COALESCE(a.attendance_status, 'Not attended') AS attendance_status
+        FROM class_session cs
+        LEFT JOIN attendance a
+            ON a.session_id = cs.session_id
+        AND a.enrolment_id = ?
+        WHERE cs.class_offering_id = ?
+        ORDER BY cs.session_no ASC
+        `,
+        [enrolment_id, enrolment_id, class_offering_id]
+        );
+
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
 // READ (with joins and optional filters/search)
 // [GET /class-sessions]
 router.get('/', async (req, res, next) => {

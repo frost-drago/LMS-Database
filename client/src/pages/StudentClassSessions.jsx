@@ -1,6 +1,7 @@
 // src/pages/StudentClassSessions.jsx
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { api, getErrorMessage } from '../api';
 import './Styles.css';
 
 export default function StudentClassSessions() {
@@ -10,135 +11,100 @@ export default function StudentClassSessions() {
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [savingId, setSavingId] = useState(null);
+  const [savingSessionId, setSavingSessionId] = useState(null);
 
-  useEffect(() => {
-    async function loadSessions() {
-      try {
-        const res = await fetch(
-          `http://localhost:4000/api/class-sessions/by-student/${encodeURIComponent(
-            student_id
-          )}/${encodeURIComponent(class_offering_id)}`
-        );
-
-        if (!res.ok) {
-          setError('Failed to load sessions.');
-          setLoading(false);
-          return;
-        }
-
-        const data = await res.json();
-        setRows(data);
-      } catch (err) {
-        setError('Failed to connect to server.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadSessions();
-  }, [student_id, class_offering_id]);
-
-  const handleSetPending = async (record_id) => {
-    if (!record_id) return; // nothing to update yet
-
+  async function loadSessions() {
+    setLoading(true);
     try {
-      setSavingId(record_id);
-      const res = await fetch(
-        `http://localhost:4000/api/grades-attendance/${record_id}/attendance-pending`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      const { data } = await api.get(
+        `/class-sessions/by-student/${encodeURIComponent(student_id)}/${encodeURIComponent(class_offering_id)}`
+      );
+      setRows(data);
+    } catch (err) {
+      alert(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { loadSessions(); }, [student_id, class_offering_id]);
+
+  async function handleSetPending(session_id_value) {
+    try {
+      setSavingSessionId(session_id_value);
+
+      const { data } = await api.patch(
+        `/attendance/student/${encodeURIComponent(student_id)}/session/${encodeURIComponent(session_id_value)}/pending`
       );
 
-      if (!res.ok) {
-        console.error('Failed to update attendance');
-        return;
-      }
-
-      const updated = await res.json();
-
-      setRows((prev) =>
-        prev.map((row) =>
-          row.record_id === record_id
-            ? { ...row, attendance_status: updated.attendance_status }
-            : row
+      setRows(prev =>
+        prev.map(r =>
+          r.session_id === session_id_value
+            ? { ...r, attendance_status: data.attendance_status }
+            : r
         )
       );
     } catch (err) {
-      console.error(err);
+      alert(getErrorMessage(err));
     } finally {
-      setSavingId(null);
+      setSavingSessionId(null);
     }
-  };
+  }
 
   const titleText = classOffering
     ? `${classOffering.course_code} — ${classOffering.course_name}`
-    : `Class Offering #${class_offering_id}`;
+    : `Class Sessions (${class_offering_id})`;
 
   return (
-    <div className="container-centered">
-      <h1 className="title">Class Sessions</h1>
-      <p className="subtitle">{titleText}</p>
+    <div className="page">
+      <h2>{titleText}</h2>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="error-text">{error}</p>}
-
-      {!loading && !error && rows.length === 0 && (
-        <p className="placeholder-text">No sessions found for this class.</p>
-      )}
-
-      {!loading && rows.length > 0 && (
-        <div className="table-wrapper">
-          <table className="table">
+      {loading ? (
+        <div className="no-data">Loading…</div>
+      ) : (
+        <div className="table-wrap">
+          <table className="table" width="100%" cellPadding="8">
             <thead>
               <tr>
-                <th>Session No</th>
-                <th>Date</th>
+                <th>No</th>
                 <th>Title</th>
+                <th>Start</th>
+                <th>End</th>
                 <th>Room</th>
-                <th>Assessment Type</th>
-                <th>Score</th>
-                <th>Weight</th>
                 <th>Attendance</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
+
             <tbody>
-              {rows.map((row) => {
-                const date =
-                  row.session_start_date &&
-                  new Date(row.session_start_date).toLocaleDateString();
+              {rows.map(row => {
+                const canSetPending = (row.attendance_status === 'Not attended');
 
                 return (
                   <tr key={row.session_id}>
                     <td>{row.session_no}</td>
-                    <td>{date || '-'}</td>
-                    <td>{row.title || '-'}</td>
-                    <td>{row.room || '-'}</td>
-                    <td>{row.assessment_type || '-'}</td>
-                    <td>{row.score ?? '-'}</td>
-                    <td>{row.weight ?? '-'}</td>
-                    <td>{row.attendance_status || '-'}</td>
-                    <td>
+                    <td>{row.title || '—'}</td>
+                    <td>{row.session_start_date}</td>
+                    <td>{row.session_end_date}</td>
+                    <td>{row.room || '—'}</td>
+                    <td>{row.attendance_status || 'Not attended'}</td>
+                    <td className="actions-cell">
                       <button
-                        type="button"
-                        className="nav-link"
-                        disabled={!row.record_id || savingId === row.record_id}
-                        onClick={() => handleSetPending(row.record_id)}
+                        disabled={!canSetPending || savingSessionId === row.session_id}
+                        onClick={() => handleSetPending(row.session_id)}
                       >
-                        {savingId === row.record_id
-                          ? 'Saving...'
-                          : 'Set Pending'}
+                        {savingSessionId === row.session_id ? 'Saving…' : 'Set Pending'}
                       </button>
                     </td>
                   </tr>
                 );
               })}
+
+              {!rows.length && (
+                <tr>
+                  <td colSpan="7" className="no-data">No sessions found</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

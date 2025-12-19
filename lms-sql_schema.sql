@@ -118,41 +118,62 @@ CREATE TABLE IF NOT EXISTS enrolment (
 -- for quick sorting when needed.
 CREATE INDEX index_enrolment_offering ON enrolment (class_offering_id);
 
-
--- our lecturer told us to reduce the number of tables so we have this combined table now.
--- pretend that every session must have an attendance and grading on the spot.S
-CREATE TABLE IF NOT EXISTS grades_and_attendance (
-	record_id BIGINT AUTO_INCREMENT, -- already PK
+CREATE TABLE IF NOT EXISTS attendance (
+	attendance_id BIGINT AUTO_INCREMENT, -- already PK
     enrolment_id BIGINT NOT NULL,
     session_id BIGINT NOT NULL,
-    assessment_type VARCHAR(50) NOT NULL,
-    score TINYINT UNSIGNED NOT NULL, -- on the assumption that grades are not floats
-    weight TINYINT UNSIGNED NOT NULL, -- on the assumption that weights are not floats
     attendance_status ENUM('Verified','Pending','Not attended') NOT NULL default 'Not attended',
-    PRIMARY KEY (record_id),
+    PRIMARY KEY (attendance_id),
     FOREIGN KEY (enrolment_id) REFERENCES enrolment (enrolment_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (session_id) REFERENCES class_session (session_id) ON DELETE CASCADE ON UPDATE CASCADE,
     
     -- person must be unique per session, no duplicates
-    CONSTRAINT unique_grades_and_attendance UNIQUE(enrolment_id, session_id),
+    CONSTRAINT unique_attendance UNIQUE(enrolment_id, session_id)
+);
+
+CREATE TABLE IF NOT EXISTS assessment_type (
+	assessment_id INT AUTO_INCREMENT,
+    course_code CHAR(11),
+    assessment_type VARCHAR(50) NOT NULL,
+    weight TINYINT UNSIGNED NOT NULL, -- on the assumption that weights are not floats
     
-    -- 0 <= score <= 100; 0 <= weight <= 100
-    CHECK (score >= 0 AND 100 >= score AND weight >= 0 AND 100 >= weight)
+    PRIMARY KEY (assessment_id),
+    FOREIGN KEY (course_code) REFERENCES course (course_code) ON DELETE CASCADE ON UPDATE CASCADE,
+    
+    -- type of assessment must be unique per course, no duplicates
+    CONSTRAINT unique_asessment UNIQUE(course_code, assessment_type),
+    
+    -- 0 <= weight <= 100
+    CHECK (weight >= 0 AND 100 >= weight)
+);
+
+CREATE TABLE IF NOT EXISTS grade (
+	grade_id BIGINT AUTO_INCREMENT,
+    enrolment_id BIGINT NOT NULL,
+	score TINYINT UNSIGNED NOT NULL, -- on the assumption that grades are not floats
+    assessment_id INT,
+    
+    PRIMARY KEY (grade_id),
+    FOREIGN KEY (enrolment_id) REFERENCES enrolment (enrolment_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (assessment_id) REFERENCES assessment_type (assessment_id) ON DELETE CASCADE ON UPDATE CASCADE,
+	
+    -- 0 <= score <= 100
+    CHECK (score >= 0 AND 100 >= score)
 );
 
 -- Views
-CREATE VIEW view_student_grades_and_attendance AS
-SELECT p.full_name, ga.session_id, ga.assessment_type, ga.score, ga.weight, ga.attendance_status
-FROM grades_and_attendance ga
-JOIN enrolment e ON ga.enrolment_id = e.enrolment_id
-JOIN student s ON s.student_id = e.student_id
-JOIN person p ON p.person_id = s.person_id;
+-- CREATE VIEW view_student_grades_and_attendance AS
+-- SELECT p.full_name, ga.session_id, ga.assessment_type, ga.score, ga.weight, ga.attendance_status
+-- FROM grades_and_attendance ga
+-- JOIN enrolment e ON ga.enrolment_id = e.enrolment_id
+-- JOIN student s ON s.student_id = e.student_id
+-- JOIN person p ON p.person_id = s.person_id;
 
 -- indexes to speed up the view
-CREATE INDEX index_ga_enrolment_id ON grades_and_attendance (enrolment_id);
-CREATE INDEX index_ga_session_id ON grades_and_attendance (session_id);
-CREATE INDEX index_enrolment_student_id ON enrolment (student_id);
+-- CREATE INDEX index_ga_enrolment_id ON grades_and_attendance (enrolment_id);
+-- CREATE INDEX index_ga_session_id ON grades_and_attendance (session_id);
+-- CREATE INDEX index_enrolment_student_id ON enrolment (student_id);
 -- CREATE INDEX index_student_student_id ON student (student_id);
-CREATE INDEX index_student_person_id ON student (person_id);
+-- CREATE INDEX index_student_person_id ON student (person_id);
 
 
