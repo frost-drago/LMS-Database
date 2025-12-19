@@ -157,6 +157,9 @@ CREATE TABLE IF NOT EXISTS grade (
     FOREIGN KEY (enrolment_id) REFERENCES enrolment (enrolment_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (assessment_id) REFERENCES assessment_type (assessment_id) ON DELETE CASCADE ON UPDATE CASCADE,
 	
+    -- no duplicate assessment
+    CONSTRAINT unique_grade_per_assessment UNIQUE (enrolment_id, assessment_id),
+    
     -- 0 <= score <= 100
     CHECK (score >= 0 AND 100 >= score)
 );

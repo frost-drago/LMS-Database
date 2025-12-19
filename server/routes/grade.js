@@ -7,6 +7,50 @@ TABLE: grade(grade_id PK, enrolment_id FK, score, assessment_id FK)
 Base path suggestion: /grades
 */
 
+// READ: gradebook for one class offering + one assessment type
+// GET /grades/gradebook?class_offering_id=...&assessment_id=...
+router.get('/gradebook', async (req, res, next) => {
+    try {
+        const { class_offering_id, assessment_id } = req.query;
+
+        if (!class_offering_id || !assessment_id) {
+        return res.status(400).json({ error: 'class_offering_id and assessment_id are required' });
+        }
+
+        const sql = `
+        SELECT
+            e.enrolment_id,
+            e.student_id,
+            e.class_offering_id,
+            e.enrolment_status,
+            p.full_name AS student_name,
+            p.email AS student_email,
+
+            at.assessment_id,
+            at.assessment_type,
+            at.weight,
+            at.course_code,
+
+            g.grade_id,
+            g.score
+        FROM enrolment e
+        JOIN student s ON s.student_id = e.student_id
+        JOIN person p ON p.person_id = s.person_id
+        JOIN class_offering co ON co.class_offering_id = e.class_offering_id
+        JOIN assessment_type at ON at.course_code = co.course_code AND at.assessment_id = ?
+        LEFT JOIN grade g ON g.enrolment_id = e.enrolment_id AND g.assessment_id = at.assessment_id
+        WHERE e.class_offering_id = ?
+        ORDER BY p.full_name ASC
+        `;
+
+        const [rows] = await pool.execute(sql, [Number(assessment_id), Number(class_offering_id)]);
+        res.json(rows);
+    } catch (e) {
+        next(e);
+    }
+});
+
+
 router.get('/student/:student_id/class-offering/:class_offering_id', async (req, res) => {
     const { student_id, class_offering_id } = req.params;
 

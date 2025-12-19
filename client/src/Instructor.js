@@ -5,6 +5,8 @@ import { NavLink, Routes, Route, useLocation, useParams } from 'react-router-dom
 import InstructorTeachingAssignments from './pages/InstructorTeachingAssignments';
 import InstructorClassSessions from './pages/InstructorClassSessions';
 import InstructorSessionAttendance from './pages/InstructorSessionAttendance';
+import InstructorAssessmentTypes from './pages/InstructorAssessmentTypes';
+import InstructorGradebook from './pages/InstructorGradebook';
 
 
 const navStyle = ({ isActive }) =>
@@ -95,6 +97,14 @@ export default function Instructor() {
         <Route
           path="class-offerings/:class_offering_id/sessions/:session_id/attendance"
           element={<InstructorSessionAttendance />}
+        />
+        <Route
+          path="class-offerings/:class_offering_id/assessment-types"
+          element={<InstructorAssessmentTypes />}
+        />
+        <Route
+          path="class-offerings/:class_offering_id/assessment-types/:assessment_id/grades"
+          element={<InstructorGradebook />}
         />
       </Routes>
     </div>

@@ -10,6 +10,19 @@ export default function InstructorTeachingAssignments() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Add this new handler inside InstructorTeachingAssignments.jsx
+  const handleViewAssessmentTypes = (co) => {
+    navigate(
+      `/instructor/${encodeURIComponent(
+        instructor_id
+      )}/class-offerings/${co.class_offering_id}/assessment-types`,
+      {
+        state: { classOffering: co },
+      }
+    );
+  };
+
+
   useEffect(() => {
     async function loadClasses() {
       try {
@@ -88,6 +101,13 @@ export default function InstructorTeachingAssignments() {
                 onClick={() => handleViewSessions(co)}
               >
                 View Sessions
+              </button>
+              <button
+                type="button"
+                className="nav-link"
+                onClick={() => handleViewAssessmentTypes(co)}
+              >
+                Grading
               </button>
             </div>
           ))}
