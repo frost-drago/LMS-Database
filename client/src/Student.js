@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Routes, Route, useLocation, useParams } from 'react-router-dom';
 
 import StudentClassOffering from './pages/StudentClassOffering';
-import StudentClassSessions from './pages/StudentClassSessions'; // NEW
+import StudentClassSessions from './pages/StudentClassSessions'; 
+import StudentGradesSummary from './pages/StudentGradesSummary';
+import StudentGradesDetail from './pages/StudentGradesDetail';
 
 const navStyle = ({ isActive }) =>
   isActive ? 'nav-link nav-link-active' : 'nav-link';
@@ -85,6 +87,8 @@ export default function Student() {
           path="class-offerings/:class_offering_id/sessions"
           element={<StudentClassSessions />}
         />
+        <Route path="grades" element={<StudentGradesSummary />} />
+        <Route path="grades/:class_offering_id" element={<StudentGradesDetail />} />
       </Routes>
     </div>
   );

@@ -48,6 +48,13 @@ export default function StudentClassOffering() {
     );
   };
 
+const handleViewGrades = (co) => {
+    navigate(
+      `/student/${encodeURIComponent(student_id)}/grades/${co.class_offering_id}`,
+      { state: { classOffering: co } } // optional, but consistent
+    );
+  };
+
   return (
     <div className="container-centered">
       <h1 className="title">My Class Offerings</h1>
@@ -83,6 +90,13 @@ export default function StudentClassOffering() {
                 onClick={() => handleViewSessions(co)}
               >
                 View Sessions
+              </button>
+              <button
+                type="button"
+                className="nav-link"
+                onClick={() => handleViewGrades(co)}
+              >
+                View Grades
               </button>
             </div>
           ))}
